@@ -12,6 +12,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\ConnectionException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
@@ -78,6 +79,22 @@ class InstallPlatformCommand extends Command
             InputArgument::REQUIRED,
             'The type of install. Available options: ' . implode(', ', array_keys($this->installers))
         );
+        // @todo This is not the right approach, base configure step, just like base schema, should be inline here
+        // @todo and not on installer duplicating things in every installer
+        // @todo OR? Problem with that argument is that if installers (db) is allowed to generate config we violate 12-factor
+        // @note Only Studio demo inserts config, and it might unneded.
+        $this->addOption(
+            'skip-config',
+            null,
+            InputOption::VALUE_NONE,
+            'To skip dumping configuration, for use when running command first with `skip-data`'
+        );
+        $this->addOption(
+            'skip-data',
+            null,
+            InputOption::VALUE_NONE,
+            'To skip inserting data, for use when running command in second iteration with `skip-config`'
+        );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -96,12 +113,24 @@ class InstallPlatformCommand extends Command
 
         $installer->setOutput($output);
 
-        $installer->createConfiguration();
-        $installer->importSchema();
-        $installer->importData();
-        $installer->importBinaries();
+        $skipConfigure = $input->getOption('skip-config');
+        $skipData = $input->getOption('skip-data');
+
+        if (!$skipConfigure) {
+            $installer->createConfiguration();
+        }
+
+        if (!$skipData) {
+            $installer->importSchema();
+            $installer->importData();
+            $installer->importBinaries();
+        }
+
         $this->cacheClear($output);
-        $this->indexData($output);
+
+        if (!$skipData) {
+            $this->indexData($output);
+        }
     }
 
     private function checkPermissions()

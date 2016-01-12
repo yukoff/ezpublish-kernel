@@ -8,6 +8,12 @@
  */
 namespace EzSystems\PlatformInstallerBundle\Installer;
 
+/**
+ * Interface Installer
+ *
+ *
+ * @deprecated since 6.1 Migrate to SQLInstaller interface as soon as possible.
+ */
 interface Installer
 {
     public function importSchema();
