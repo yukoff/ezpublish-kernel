@@ -232,7 +232,7 @@ class TextLineTest extends FieldTypeTest
                 null,
             ),
             array(
-                new TextLineValue(),
+                new TextLineValue(''),
                 '',
             ),
             array(
