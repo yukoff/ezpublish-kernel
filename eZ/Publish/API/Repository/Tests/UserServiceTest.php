@@ -802,9 +802,9 @@ class UserServiceTest extends BaseTest
      * @return \eZ\Publish\API\Repository\Values\User\User
      *
      * @see \eZ\Publish\API\Repository\UserService::createUser()
-     * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserGroup
-     * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testNewUserCreateStruct
-     * @depends eZ\Publish\API\Repository\Tests\ContentServiceTest::testCreateContent
+     * @d\epends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserGroup
+     * @d\epends eZ\Publish\API\Repository\Tests\UserServiceTest::testNewUserCreateStruct
+     * @d\epends eZ\Publish\API\Repository\Tests\ContentServiceTest::testCreateContent
      */
     public function testCreateUser()
     {
@@ -1154,8 +1154,22 @@ class UserServiceTest extends BaseTest
 
         // This call will fail with a "NotFoundException", because the given
         // login/password combination does not exist.
-        $userService->loadUserByCredentials('üser', 'secret');
+        $user = $userService->loadUserByCredentials('üser', 'secret');
         /* END: Use Case */
+
+        $setupFactory = $this->getSetupFactory();
+        $setupFactoryReflection = new \ReflectionObject($setupFactory);
+        $repositoryMethod = $setupFactoryReflection->getMethod('getDatabaseHandler');
+        $repositoryMethod->setAccessible(true);
+        /** @var \eZ\Publish\Core\Persistence\Doctrine\ConnectionHandler $db */
+        $db =  $repositoryMethod->invoke($setupFactory);
+
+        $this->fail(
+            "Found user when there should be none, loaded 'üser' and got: " . $user->login . ' ' . $user->getUserId() .
+            "\n LC_*:" . LC_ALL . ' ' . LC_COLLATE . ' ' . LC_CTYPE . ' ' . LC_MONETARY . ' ' . LC_NUMERIC . ' ' . LC_TIME .
+            "\n ini:" . ini_get('default_charset') . ' ' . ini_get('mbstring.internal_encoding') .
+            "\n db:" . $db->getName() . var_dump($db->getConnection()->query("SELECT SCHEMA_NAME 'testdb', default_character_set_name 'charset', DEFAULT_COLLATION_NAME 'collation' FROM information_schema.SCHEMATA;")->fetchAll())
+        );
     }
 
     /**

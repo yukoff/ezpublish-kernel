@@ -13,38 +13,13 @@ matrix:
 #    - php: hhvm
 #      env: TEST_CONFIG="phpunit.xml"
   include:
-# 5.5
-    - php: 5.5
-      env: TEST_CONFIG="phpunit.xml"
     - php: 5.5
       env: TEST_CONFIG="phpunit-integration-legacy.xml" DB="mysql" DATABASE="mysql://root@localhost/$DB_NAME"
-    - php: 5.5
-      env: TEST_CONFIG="phpunit-integration-legacy.xml" DB="postgresql" DATABASE="pgsql://postgres@localhost/$DB_NAME"
-# 5.6
     - php: 5.6
-      env: TEST_CONFIG="phpunit.xml" SYMFONY_VERSION="~2.7.0"
-    - php: 5.6
-      env: TEST_CONFIG="phpunit-integration-legacy.xml" SYMFONY_VERSION="~2.7.0"
-    - php: 5.6
-      env: BEHAT_OPTS="--profile=core --tags='~@broken'"
-# 7.0
+      env: TEST_CONFIG="phpunit-integration-legacy.xml" DB="mysql" DATABASE="mysql://root@localhost/$DB_NAME"
     - php: 7.0
-      env: REST_TEST_CONFIG="phpunit-functional-rest.xml"
-    - php: 7.0
-      env: TEST_CONFIG="phpunit.xml"
-    - php: 7.0
-      env: BEHAT_OPTS="--profile=rest --suite=fullJson"
-    - php: 7.0
-      env: ELASTICSEARCH_VERSION="1.4.2" TEST_CONFIG="phpunit-integration-legacy-elasticsearch.xml"
-#    - php: 7.0
-#      env: SOLR_VERSION="4.10.4" TEST_CONFIG="phpunit-integration-legacy-solr.xml" CORES_SETUP="dedicated" SOLR_CORES="core0 core1 core2 core3" SOLR_CONFS="vendor/ezsystems/ezplatform-solr-search-engine/lib/Resources/config/solr/schema.xml vendor/ezsystems/ezplatform-solr-search-engine/lib/Resources/config/solr/custom-fields-types.xml vendor/ezsystems/ezplatform-solr-search-engine/lib/Resources/config/solr/language-fieldtypes.xml"
-#    - php: 7.0
-#      env: SOLR_VERSION="4.10.4" TEST_CONFIG="phpunit-integration-legacy-solr.xml" CORES_SETUP="shared" SOLR_CORES="core0 core1 core2 core3" SOLR_CONFS="vendor/ezsystems/ezplatform-solr-search-engine/lib/Resources/config/solr/schema.xml vendor/ezsystems/ezplatform-solr-search-engine/lib/Resources/config/solr/custom-fields-types.xml vendor/ezsystems/ezplatform-solr-search-engine/lib/Resources/config/solr/language-fieldtypes.xml"
-    - php: 7.0
-      env: SOLR_VERSION="4.10.4" TEST_CONFIG="phpunit-integration-legacy-solr.xml" CORES_SETUP="single" SOLR_CONFS="vendor/ezsystems/ezplatform-solr-search-engine/lib/Resources/config/solr/schema.xml vendor/ezsystems/ezplatform-solr-search-engine/lib/Resources/config/solr/custom-fields-types.xml vendor/ezsystems/ezplatform-solr-search-engine/lib/Resources/config/solr/language-fieldtypes.xml"
-# hhvm - disabled, no need to enable before travis has newer versions avaiable
-#    - php: hhvm
-#      env: TEST_CONFIG="phpunit.xml"
+      env: TEST_CONFIG="phpunit-integration-legacy.xml" DB="mysql" DATABASE="mysql://root@localhost/$DB_NAME"
+
 
 
 # test only master (+ Pull requests)
@@ -65,7 +40,7 @@ before_script:
 
 # execute phpunit or behat as the script command
 script:
-  - if [ "$TEST_CONFIG" != "" ] ; then php -d date.timezone=$TEST_TIMEZONE -d memory_limit=-1 vendor/bin/phpunit -c $TEST_CONFIG ; fi
+  - if [ "$TEST_CONFIG" != "" ] ; then php -d date.timezone=$TEST_TIMEZONE -d memory_limit=-1 vendor/bin/phpunit -c $TEST_CONFIG eZ/Publish/API/Repository/Tests/UserServiceTest.php ; fi
   - if [ "$BEHAT_OPTS" != "" ] ; then cd "$HOME/build/ezplatform" && php bin/behat -vv $BEHAT_OPTS ; fi
   - if [ "$REST_TEST_CONFIG" != "" ] ; then cd "$HOME/build/ezplatform"; php -d date.timezone=$TEST_TIMEZONE -d memory_limit=-1 bin/phpunit -v vendor/ezsystems/ezpublish-kernel/eZ/Bundle/EzPublishRestBundle/Tests/Functional ; fi
 
