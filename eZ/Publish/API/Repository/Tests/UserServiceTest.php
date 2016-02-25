@@ -1141,7 +1141,7 @@ class UserServiceTest extends BaseTest
      *
      * @see \eZ\Publish\API\Repository\UserService::loadUserByCredentials()
      * @expectedException \eZ\Publish\API\Repository\Exceptions\NotFoundException
-     * @depends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserByCredentials
+     * @d.epends eZ\Publish\API\Repository\Tests\UserServiceTest::testLoadUserByCredentials
      */
     public function testLoadUserByCredentialsThrowsNotFoundExceptionForUnknownLogin()
     {
@@ -1154,6 +1154,7 @@ class UserServiceTest extends BaseTest
 
         // This call will fail with a "NotFoundException", because the given
         // login/password combination does not exist.
+        echo '||start||';
         $user = $userService->loadUserByCredentials('üser', 'secret');
         /* END: Use Case */
 

@@ -40,7 +40,7 @@ before_script:
 
 # execute phpunit or behat as the script command
 script:
-  - if [ "$TEST_CONFIG" != "" ] ; then php -d date.timezone=$TEST_TIMEZONE -d memory_limit=-1 vendor/bin/phpunit -c $TEST_CONFIG eZ/Publish/API/Repository/Tests/UserServiceTest.php ; fi
+  - if [ "$TEST_CONFIG" != "" ] ; then php -d date.timezone=$TEST_TIMEZONE -d memory_limit=-1 vendor/bin/phpunit -c $TEST_CONFIG --filter UserServiceTest::testLoadUserByCredentialsThrowsNotFoundExceptionForUnknownLogin ; fi
   - if [ "$BEHAT_OPTS" != "" ] ; then cd "$HOME/build/ezplatform" && php bin/behat -vv $BEHAT_OPTS ; fi
   - if [ "$REST_TEST_CONFIG" != "" ] ; then cd "$HOME/build/ezplatform"; php -d date.timezone=$TEST_TIMEZONE -d memory_limit=-1 bin/phpunit -v vendor/ezsystems/ezpublish-kernel/eZ/Bundle/EzPublishRestBundle/Tests/Functional ; fi
 
