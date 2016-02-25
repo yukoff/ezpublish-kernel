@@ -183,10 +183,10 @@ class DoctrineDatabase extends Gateway
         )->where(
             $query->expr->eq(
                 $this->handler->quoteColumn('login_normalized', 'ezuser'),
-                $query->bindValue(mb_strtolower($login, 'UTF-8'), null, \PDO::PARAM_STR)
+                $query->bindValue($login = mb_strtolower($login, 'UTF-8'), null, \PDO::PARAM_STR)
             )
         );
-
+        echo $login;
         $statement = $query->prepare();
         $statement->execute();
 
