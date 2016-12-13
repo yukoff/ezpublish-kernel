@@ -56,6 +56,11 @@ class LegacyDFSCluster implements IOMetadataHandler
     {
         $path = $this->addPrefix($binaryFileCreateStruct->id);
 
+        // Some code has been using integer, though DateTime is correct. Convert to DateTime if needed.
+        if (is_int($binaryFileCreateStruct->mtime)) {
+            $binaryFileCreateStruct->mtime = new DateTime('@' . $binaryFileCreateStruct->mtime);
+        }
+
         try {
             /*
              * @todo what might go wrong here ? Can another process be trying to insert the same image ?
@@ -73,12 +78,7 @@ SQL
             $stmt->bindValue('name', $path);
             $stmt->bindValue('name_hash', md5($path));
             $stmt->bindValue('name_trunk', $this->getNameTrunk($binaryFileCreateStruct));
-            $stmt->bindValue(
-                'mtime',
-                $binaryFileCreateStruct->mtime instanceof DateTime
-                    ? $binaryFileCreateStruct->mtime->getTimestamp()
-                    : $binaryFileCreateStruct->mtime
-            );
+            $stmt->bindValue('mtime', $binaryFileCreateStruct->mtime->getTimestamp());
             $stmt->bindValue('size', $binaryFileCreateStruct->size);
             $stmt->bindValue('scope', $this->getScope($binaryFileCreateStruct));
             $stmt->bindValue('datatype', $binaryFileCreateStruct->mimeType);

@@ -37,7 +37,19 @@ class LegacyDFSClusterTest extends PHPUnit_Framework_TestCase
         );
     }
 
-    public function testCreate()
+    public function providerCreate()
+    {
+        return [
+            ['prefix/my/file.png', 'image/png', 123, new DateTime('@1307155200'), new DateTime('@1307155200')],
+            ['prefix/my/file.png', 'image/png', 123, new DateTime('@1307155200'), new DateTime('@1307155200')],
+            ['prefix/my/file.png', 'image/png', 123, 1307155242, new DateTime('@1307155242')],
+        ];
+    }
+
+    /**
+     * @dataProvider providerCreate
+     */
+    public function testCreate($id, $mimeType, $size, $mtime, $mtimeExpected)
     {
         $this->dbalMock
             ->expects($this->once())
@@ -46,15 +58,16 @@ class LegacyDFSClusterTest extends PHPUnit_Framework_TestCase
             ->will($this->returnValue($this->createDbalStatementMock()));
 
         $spiCreateStruct = new SPIBinaryFileCreateStruct();
-        $spiCreateStruct->id = 'prefix/my/file.png';
-        $spiCreateStruct->mimeType = 'image/png';
-        $spiCreateStruct->size = 123;
-        $spiCreateStruct->mtime = new DateTime('@1307155200');
+        $spiCreateStruct->id = $id;
+        $spiCreateStruct->mimeType = $mimeType;
+        $spiCreateStruct->size = $size;
+        $spiCreateStruct->mtime = $mtime;
 
-        $this->assertInstanceOf(
-            'eZ\Publish\SPI\IO\BinaryFile',
-            $this->handler->create($spiCreateStruct)
-        );
+        $spiBinary = $this->handler->create($spiCreateStruct);
+
+        $this->assertInstanceOf('eZ\Publish\SPI\IO\BinaryFile', $spiBinary);
+
+        $this->assertEquals($mtimeExpected, $spiBinary->mtime);
     }
 
     public function testDelete()
