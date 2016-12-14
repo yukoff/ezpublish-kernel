@@ -12,6 +12,7 @@ use DateTime;
 use eZ\Publish\Core\IO\IOMetadataHandler;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
+use eZ\Publish\Core\Base\Exceptions\InvalidArgumentException;
 use eZ\Publish\Core\Base\Exceptions\NotFoundException;
 use eZ\Publish\Core\IO\Exception\BinaryFileNotFoundException;
 use eZ\Publish\Core\IO\Exception\InvalidBinaryFileIdException;
@@ -46,20 +47,22 @@ class LegacyDFSCluster implements IOMetadataHandler
     /**
      * Inserts a new reference to file $spiBinaryFileId.
      *
-     * @param string  $spiBinaryFileId
+     * @since 6.8 The mtime of the $binaryFileCreateStruct must be a DateTime, as specified in the struct doc.
      *
+     * @param SPIBinaryFileCreateStruct $binaryFileCreateStruct
+     *
+     * @throws InvalidArgumentException if the $binaryFileCreateStruct is invalid
      * @throws RuntimeException if a DBAL error occurs
      *
      * @return \eZ\Publish\SPI\IO\BinaryFile
      */
     public function create(SPIBinaryFileCreateStruct $binaryFileCreateStruct)
     {
-        $path = $this->addPrefix($binaryFileCreateStruct->id);
-
-        // Some code has been using integer, though DateTime is correct. Convert to DateTime if needed.
-        if (is_int($binaryFileCreateStruct->mtime)) {
-            $binaryFileCreateStruct->mtime = new DateTime('@' . $binaryFileCreateStruct->mtime);
+        if (!($binaryFileCreateStruct->mtime instanceof DateTime)) {
+            throw new InvalidArgumentException('$binaryFileCreateStruct', 'Property \'mtime\' must be a DateTime');
         }
+
+        $path = $this->addPrefix($binaryFileCreateStruct->id);
 
         try {
             /*

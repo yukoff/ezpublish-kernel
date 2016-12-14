@@ -41,8 +41,8 @@ class LegacyDFSClusterTest extends PHPUnit_Framework_TestCase
     {
         return [
             ['prefix/my/file.png', 'image/png', 123, new DateTime('@1307155200'), new DateTime('@1307155200')],
-            ['prefix/my/file.png', 'image/png', 123, new DateTime('@1307155200'), new DateTime('@1307155200')],
-            ['prefix/my/file.png', 'image/png', 123, 1307155242, new DateTime('@1307155242')],
+            ['prefix/my/file.png', 'image/png', 123, new DateTime('@1307155200'), new DateTime('@1307155200')], // Duplicate, should not fail
+            ['prefix/my/file.png', 'image/png', 123, new DateTime('@1307155242'), new DateTime('@1307155242')],
         ];
     }
 
@@ -68,6 +68,24 @@ class LegacyDFSClusterTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('eZ\Publish\SPI\IO\BinaryFile', $spiBinary);
 
         $this->assertEquals($mtimeExpected, $spiBinary->mtime);
+    }
+
+    /**
+     * @expectedException \eZ\Publish\API\Repository\Exceptions\InvalidArgumentException
+     */
+    public function testCreateInvalidArgument()
+    {
+        $this->dbalMock
+            ->expects($this->never())
+            ->method('prepare');
+
+        $spiCreateStruct = new SPIBinaryFileCreateStruct();
+        $spiCreateStruct->id = 'prefix/my/file.png';
+        $spiCreateStruct->mimeType = 'image/png';
+        $spiCreateStruct->size = 123;
+        $spiCreateStruct->mtime = 1307155242; // Invalid, should be a DateTime
+
+        $this->handler->create($spiCreateStruct);
     }
 
     public function testDelete()
