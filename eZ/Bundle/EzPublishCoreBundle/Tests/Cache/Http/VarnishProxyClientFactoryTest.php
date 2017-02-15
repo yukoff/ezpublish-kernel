@@ -26,6 +26,11 @@ class VarnishProxyClientFactoryTest extends PHPUnit_Framework_TestCase
     private $proxyClientClass;
 
     /**
+     * @var string
+     */
+    private $httpDispatcherClass;
+
+    /**
      * @var VarnishProxyClientFactory
      */
     private $factory;
@@ -35,7 +40,22 @@ class VarnishProxyClientFactoryTest extends PHPUnit_Framework_TestCase
         parent::setUp();
         $this->configResolver = $this->getMock('\eZ\Publish\Core\MVC\ConfigResolverInterface');
         $this->proxyClientClass = '\FOS\HttpCache\ProxyClient\Varnish';
+        $this->httpDispatcherClass = 'FOS\HttpCache\ProxyClient\HttpDispatcher';
         $this->factory = new VarnishProxyClientFactory($this->configResolver, new DynamicSettingParser(), $this->proxyClientClass);
+    }
+
+    private static function filterUri($uri) {
+        if (is_array($uri)) {
+            $result = [];
+            foreach ($uri as $value) {
+                $result[] = $value->__toString();
+            }
+            return $result;
+        }
+	else if (is_object($uri)) {
+            return $uri->__toString();
+	}
+	return $uri;
     }
 
     public function testBuildProxyClientNoDynamicSettings()
@@ -50,9 +70,20 @@ class VarnishProxyClientFactoryTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf($this->proxyClientClass, $proxyClient);
 
         $refProxy = new ReflectionObject($proxyClient);
-        $refServers = $refProxy->getParentClass()->getProperty('servers');
+        $propHttpDispatcher = $refProxy->getParentClass()->getProperty('httpDispatcher');
+        $propHttpDispatcher->setAccessible(true);
+
+        $httpDispatcher = $propHttpDispatcher->getValue($proxyClient);
+        $this->assertInstanceOf($this->httpDispatcherClass, $httpDispatcher);
+
+        $refHttpDispatcher = new ReflectionObject($httpDispatcher);
+        $refServers = $refHttpDispatcher->getProperty('servers');
         $refServers->setAccessible(true);
-        $this->assertSame($servers, $refServers->getValue($proxyClient));
+        $this->assertSame($servers, self::filterUri($refServers->getValue($httpDispatcher)));
+
+        $refBaseUri = $refHttpDispatcher->getProperty('baseUri');
+        $refBaseUri->setAccessible(true);
+        $this->assertSame($baseUrl, self::filterUri($refBaseUri->getValue($httpDispatcher)));
     }
 
     public function testBuildProxyClientWithDynamicSettings()
@@ -71,8 +102,20 @@ class VarnishProxyClientFactoryTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf($this->proxyClientClass, $proxyClient);
 
         $refProxy = new ReflectionObject($proxyClient);
-        $refServers = $refProxy->getParentClass()->getProperty('servers');
+        $propHttpDispatcher = $refProxy->getParentClass()->getProperty('httpDispatcher');
+        $propHttpDispatcher->setAccessible(true);
+
+        $httpDispatcher = $propHttpDispatcher->getValue($proxyClient);
+        $this->assertInstanceOf($this->httpDispatcherClass, $httpDispatcher);
+
+        $refHttpDispatcher = new ReflectionObject($httpDispatcher);
+        $refServers = $refHttpDispatcher->getProperty('servers');
         $refServers->setAccessible(true);
-        $this->assertSame($expectedServers, $refServers->getValue($proxyClient));
+        $this->assertSame($expectedServers, self::filterUri($refServers->getValue($httpDispatcher)));
+
+        $refBaseUri = $refHttpDispatcher->getProperty('baseUri');
+        $refBaseUri->setAccessible(true);
+        $this->assertSame($baseUrl, self::filterUri($refBaseUri->getValue($httpDispatcher)));
+
     }
 }

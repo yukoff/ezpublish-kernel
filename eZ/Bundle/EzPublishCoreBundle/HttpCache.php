@@ -10,16 +10,18 @@ namespace eZ\Bundle\EzPublishCoreBundle;
 
 use eZ\Publish\Core\MVC\Symfony\Cache\Http\LocationAwareStore;
 use eZ\Publish\Core\MVC\Symfony\Cache\Http\RequestAwarePurger;
-use eZ\Publish\Core\MVC\Symfony\Cache\Http\SymfonyCache\UserContextSubscriber;
-use FOS\HttpCacheBundle\SymfonyCache\EventDispatchingHttpCache;
+use eZ\Publish\Core\MVC\Symfony\Cache\Http\SymfonyCache\UserContextListener;
+use FOS\HttpCache\SymfonyCache\CacheInvalidation;
+use FOS\HttpCache\SymfonyCache\EventDispatchingHttpCache;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\HttpCache\HttpCache as SymfonyHttpCache;
 
-abstract class HttpCache extends EventDispatchingHttpCache
+abstract class HttpCache extends SymfonyHttpCache implements CacheInvalidation
 {
     protected function createStore()
     {
-        return new LocationAwareStore($this->cacheDir ?: $this->kernel->getCacheDir() . '/http_cache');
+        return new LocationAwareStore($this->cacheDir ?: $this->getKernel()->getCacheDir() . '/http_cache');
     }
 
     /**
@@ -107,6 +109,6 @@ abstract class HttpCache extends EventDispatchingHttpCache
 
     protected function getDefaultSubscribers()
     {
-        return [new UserContextSubscriber(['user_hash_header' => 'X-User-Hash', 'session_name_prefix' => 'eZSESSID'])];
+        return [new UserContextListener(['user_hash_header' => 'X-User-Hash', 'session_name_prefix' => 'eZSESSID'])];
     }
 }

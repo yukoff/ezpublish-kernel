@@ -10,6 +10,7 @@ namespace eZ\Bundle\EzPublishCoreBundle\Cache\Http;
 
 use eZ\Bundle\EzPublishCoreBundle\DependencyInjection\Configuration\SiteAccessAware\DynamicSettingParserInterface;
 use eZ\Publish\Core\MVC\ConfigResolverInterface;
+use FOS\HttpCache\ProxyClient\HttpDispatcher;
 
 /**
  * Factory for Varnish proxy client.
@@ -72,7 +73,8 @@ class VarnishProxyClientFactory
         }
 
         $class = $this->proxyClientClass;
+        $httpDispatcher = new HttpDispatcher($allServers, $baseUrl);
 
-        return new $class($allServers, $baseUrl);
+        return new $class($httpDispatcher);
     }
 }

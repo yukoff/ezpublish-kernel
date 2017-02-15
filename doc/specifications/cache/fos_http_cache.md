@@ -273,8 +273,9 @@ fos_http_cache:
         # "varnish" is used, even when using Symfony HttpCache.
         default: varnish
         varnish:
-            # Means http_cache.purge_servers defined for current SiteAccess.
-            servers: [$http_cache.purge_servers$]
+            http:
+                # Means http_cache.purge_servers defined for current SiteAccess.
+                servers: [$http_cache.purge_servers$]
             
     user_context:
         enabled: true

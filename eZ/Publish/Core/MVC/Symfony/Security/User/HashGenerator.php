@@ -11,7 +11,7 @@ namespace eZ\Publish\Core\MVC\Symfony\Security\User;
 use eZ\Publish\SPI\HashGenerator as HashGeneratorInterface;
 use eZ\Publish\SPI\User\Identity as IdentityInterface;
 use eZ\Publish\SPI\User\IdentityAware;
-use FOS\HttpCache\UserContext\ContextProviderInterface;
+use FOS\HttpCache\UserContext\ContextProvider;
 use FOS\HttpCache\UserContext\UserContext;
 
 /**
@@ -19,7 +19,7 @@ use FOS\HttpCache\UserContext\UserContext;
  *
  * @deprecated since 5.4. Will be removed in 6.0. Use FOSHttpCacheBundle user context feature instead.
  */
-class HashGenerator implements HashGeneratorInterface, IdentityAware, ContextProviderInterface
+class HashGenerator implements HashGeneratorInterface, IdentityAware, ContextProvider
 {
     /**
      * @var IdentityInterface

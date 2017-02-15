@@ -29,7 +29,7 @@ class FOSPurgeClientTest extends PHPUnit_Framework_TestCase
         $this->cacheManager = $this->getMockBuilder('\FOS\HttpCacheBundle\CacheManager')
             ->setConstructorArgs(
                 array(
-                    $this->getMock('\FOS\HttpCache\ProxyClient\ProxyClientInterface'),
+                    $this->getMock('\FOS\HttpCache\ProxyClient\ProxyClient'),
                     $this->getMock(
                         '\Symfony\Component\Routing\Generator\UrlGeneratorInterface'
                     ),
