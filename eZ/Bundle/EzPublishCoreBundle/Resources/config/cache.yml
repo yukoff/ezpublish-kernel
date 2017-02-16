@@ -5,7 +5,8 @@ parameters:
     ezpublish.http_cache.store.class: eZ\Publish\Core\MVC\Symfony\Cache\Http\LocationAwareStore
     ezpublish.http_cache.store.root: "%kernel.cache_dir%/http_cache"
     ezpublish.http_cache.cache_manager.class: FOS\HttpCacheBundle\CacheManager
-    ezpublish.http_cache.proxy_client.varnish.factory.class: eZ\Bundle\EzPublishCoreBundle\Cache\Http\VarnishProxyClientFactory
+    # ezpublish.http_cache.proxy_client.varnish.factory.class: eZ\Bundle\EzPublishCoreBundle\Cache\Http\VarnishProxyClientFactory
+    ezpublish.http_cache.proxy_client.varnish.factory.class: EzSystems\PlatformHttpCacheBundle\PurgeClient\VarnishProxyClientFactory
     ezpublish.http_cache.purge_client.fos.class: eZ\Publish\Core\MVC\Symfony\Cache\Http\FOSPurgeClient
     ezpublish.http_cache.event_dispatcher.class: Symfony\Component\EventDispatcher\ContainerAwareEventDispatcher
     ezpublish.http_cache.content.base_locations_listener.class: eZ\Publish\Core\MVC\Symfony\Cache\Http\EventListener\AssignedLocationsListener
