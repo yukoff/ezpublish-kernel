@@ -9,6 +9,7 @@
 namespace eZ\Publish\Core\Persistence\Cache;
 
 use eZ\Publish\SPI\Persistence\Handler as PersistenceHandler;
+use Symfony\Component\Cache\Adapter\TagAwareAdapterInterface;
 
 /**
  * Class AbstractHandler.
@@ -18,7 +19,7 @@ use eZ\Publish\SPI\Persistence\Handler as PersistenceHandler;
 abstract class AbstractHandler
 {
     /**
-     * @var \eZ\Publish\Core\Persistence\Cache\CacheServiceDecorator
+     * @var \Symfony\Component\Cache\Adapter\TagAwareAdapterInterface
      */
     protected $cache;
 
@@ -35,17 +36,53 @@ abstract class AbstractHandler
     /**
      * Setups current handler with everything needed.
      *
-     * @param \eZ\Publish\Core\Persistence\Cache\CacheServiceDecorator $cache
+     * @param \Symfony\Component\Cache\Adapter\TagAwareAdapterInterface $cache
      * @param \eZ\Publish\SPI\Persistence\Handler $persistenceHandler
      * @param \eZ\Publish\Core\Persistence\Cache\PersistenceLogger $logger
      */
     public function __construct(
-        CacheServiceDecorator $cache,
+        TagAwareAdapterInterface $cache,
         PersistenceHandler $persistenceHandler,
         PersistenceLogger $logger
     ) {
         $this->cache = $cache;
         $this->persistenceHandler = $persistenceHandler;
         $this->logger = $logger;
+    }
+
+    /**
+     * Helper for getting multiple cache items.
+     *
+     * @param array $ids
+     * @param string $keyPrefix
+     *
+     * @return array 2 arrays returned as [$cacheMissIds, $list], where list contains objects / cache misses, key by id.
+     */
+    final protected function getMultipleCacheItems(array $ids, string $keyPrefix) : array
+    {
+        if (empty($ids)) {
+            return [[], []];
+        }
+
+        $cacheKeys = [];
+        foreach (array_unique($ids) as $id) {
+            $cacheKeys[] = $keyPrefix.$id;
+        }
+
+        $list = [];
+        $cacheMissIds = [];
+        $keyPrefixLength = strlen($keyPrefix);
+        foreach($this->cache->getItems($cacheKeys) as $key => $cacheItem) {
+            $id = substr($key, $keyPrefixLength);
+            if ($cacheItem->isHit()) {
+                $list[$id] = $cacheItem->get();
+                continue;
+            }
+
+            $cacheMissIds[] = $id;
+            $list[$id] = $cacheItem;
+        }
+
+        return [$cacheMissIds, $list];
     }
 }
