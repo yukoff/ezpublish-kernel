@@ -25,6 +25,16 @@ abstract class HttpCache extends SymfonyHttpCache implements CacheInvalidation
     }
 
     /**
+     * Made public to allow event subscribers to do refresh operations.
+     *
+     * {@inheritDoc}
+     */
+    public function fetch(Request $request, $catch = false)
+    {
+        return parent::fetch($request, $catch);
+    }
+
+    /**
      * Handle invalidation, including Http PURGE requests.
      * All non-allowed PURGE requests will receive an HTTP 405.
      *
