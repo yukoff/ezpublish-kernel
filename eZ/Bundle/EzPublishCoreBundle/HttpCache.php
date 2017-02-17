@@ -15,13 +15,13 @@ use FOS\HttpCache\SymfonyCache\CacheInvalidation;
 use FOS\HttpCache\SymfonyCache\EventDispatchingHttpCache;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\HttpCache\HttpCache as SymfonyHttpCache;
+use Symfony\Bundle\FrameworkBundle\HttpCache\HttpCache as BaseHttpCache;
 
-abstract class HttpCache extends SymfonyHttpCache implements CacheInvalidation
+abstract class HttpCache extends BaseHttpCache implements CacheInvalidation
 {
     protected function createStore()
     {
-        return new LocationAwareStore($this->cacheDir ?: $this->getKernel()->getCacheDir() . '/http_cache');
+        return new LocationAwareStore($this->cacheDir ?: $this->kernel->getCacheDir() . '/http_cache');
     }
 
     /**
